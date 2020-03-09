@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "207764362071",
+    "firebase_url": "https://todolist-efa64.firebaseio.com",
+    "project_id": "todolist-efa64",
+    "storage_bucket": "todolist-efa64.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:207764362071:android:e26e1b6f58295de8fca412",
+        "android_client_info": {
+          "package_name": "com.example.todolist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "207764362071-sjtqv0a2edrbtff511n6taolk7c9rkj3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0NvncfGC9zCi1nY285fHjTUCIUdwGrlk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "207764362071-sjtqv0a2edrbtff511n6taolk7c9rkj3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
