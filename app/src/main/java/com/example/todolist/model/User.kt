@@ -3,12 +3,10 @@ package com.example.todolist.model
 import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
-data class User(
-    var uId: String? = "",
-    val username: String? = "",
-    val email: String? = "",
-    val password: String? = "",
-    val phone: String? = "",
-    val image: ByteArray?,
-    val toDo: MutableList<ToDo>?
+data class User (
+    var uid: String? = "",
+    var username: String? = "",
+    var email: String? = "",
+    var password: String? = "",
+    var phone: String? = ""
 )

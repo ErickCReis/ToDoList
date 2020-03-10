@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.example.todolist.R
+import com.example.todolist.model.ToDo
 import com.example.todolist.model.User
+import com.example.todolist.utils.MyDatabase
 import com.google.firebase.database.DatabaseReference
 import kotlinx.android.synthetic.main.fragment_add.*
 
@@ -41,7 +43,9 @@ class AddFragment : Fragment(), AddView {
         }
 
         add_button.setOnClickListener {
-
+            val toDo = ToDo(add_title.text.toString())
+            MyDatabase.addToDo(toDo)
+            requireActivity().onBackPressed()
         }
     }
 

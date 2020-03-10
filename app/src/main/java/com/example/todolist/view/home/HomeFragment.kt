@@ -1,6 +1,7 @@
 package com.example.todolist.view.home
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,8 +12,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.R
 import com.example.todolist.model.ToDo
+import com.example.todolist.model.User
+import com.example.todolist.utils.MyDatabase
 import com.example.todolist.view.home.adapter.ListToDoAdapter
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.fragment_home.*
 
 /**
@@ -21,7 +27,6 @@ import kotlinx.android.synthetic.main.fragment_home.*
 class HomeFragment : Fragment(), HomeView, ListToDoAdapter.OnClickListener{
 
     private lateinit var presenterHome: HomePresenter
-    private lateinit var database: DatabaseReference
     private var adapter: ListToDoAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,11 +50,39 @@ class HomeFragment : Fragment(), HomeView, ListToDoAdapter.OnClickListener{
         home_toolbar.setOnMenuItemClickListener{
             when (it.itemId) {
                 R.id.exit -> {
-                    findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoginFragment2())
+                    MyDatabase.currentUserId = ""
+                    requireActivity().onBackPressed()
                 }
             }
             true
         }
+
+        Log.d("Home_MyId", MyDatabase.currentUserId!!)
+
+        MyDatabase.database
+            .child("toDo")
+            .child(MyDatabase.currentUserId!!)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                    if (dataSnapshot.exists()) {
+
+                        val listToDo: MutableList<ToDo> = mutableListOf()
+                        for (data in dataSnapshot.children) {
+                            val toDo = data.getValue(ToDo::class.java)
+                            listToDo.add(toDo!!)
+                        }
+                        Log.d("Home_response", listToDo.toString())
+                        loadList(listToDo)
+                    }
+
+
+
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("loadUser:onCancelled ${databaseError.toException()}")
+                }
+            })
 
         floating_button.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToAddFragment())
@@ -68,7 +101,7 @@ class HomeFragment : Fragment(), HomeView, ListToDoAdapter.OnClickListener{
     }
 
     override fun checkToDo(toDo: ToDo) {
-        TODO("Not yet implemented")
+        Log.d("CheckBox", toDo.title)
     }
 
     private fun getPresenter(): HomePresenter {

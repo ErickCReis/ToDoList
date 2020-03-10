@@ -49,9 +49,7 @@ class RegisterFragment : Fragment(), RegisterView {
                 register_name.text.toString(),
                 register_email.text.toString(),
                 register_password.text.toString(),
-                register_phone.text.toString(),
-                null,
-                null
+                register_phone.text.toString()
             )
 
             presenterRegister.newUser(user)
