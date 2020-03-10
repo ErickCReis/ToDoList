@@ -45,6 +45,7 @@ class RegisterFragment : Fragment(), RegisterView {
 
         register_button.setOnClickListener {
             val user = User(
+                null,
                 register_name.text.toString(),
                 register_email.text.toString(),
                 register_password.text.toString(),
@@ -52,6 +53,7 @@ class RegisterFragment : Fragment(), RegisterView {
                 null,
                 null
             )
+
             presenterRegister.newUser(user)
             findNavController().navigate(RegisterFragmentDirections.actionRegisterFragmentToHomeFragment())
         }

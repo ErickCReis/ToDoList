@@ -5,7 +5,9 @@ import com.google.firebase.database.DatabaseReference
 
 class RegisterPresenterImpl (private val database: DatabaseReference): RegisterPresenter {
     override fun newUser(user: User) {
-        database.child("users").setValue(user)
+        val key = database.child("users").push().key
+        user.uId = key
+        database.child("users").child(key!!).setValue(user)
     }
 
     override fun checkRegister() {

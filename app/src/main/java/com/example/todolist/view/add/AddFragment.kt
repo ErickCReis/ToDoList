@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.example.todolist.R
+import com.example.todolist.model.User
+import com.google.firebase.database.DatabaseReference
 import kotlinx.android.synthetic.main.fragment_add.*
 
 /**
@@ -15,6 +17,7 @@ import kotlinx.android.synthetic.main.fragment_add.*
 class AddFragment : Fragment(), AddView {
 
     private lateinit var presenterAdd: AddPresenter
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +38,10 @@ class AddFragment : Fragment(), AddView {
         add_toolbar.title = "Nova Tarefa"
         add_toolbar.setNavigationOnClickListener {
             requireActivity().onBackPressed()
+        }
+
+        add_button.setOnClickListener {
+
         }
     }
 

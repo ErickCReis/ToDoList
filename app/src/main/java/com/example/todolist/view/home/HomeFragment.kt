@@ -5,16 +5,24 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.ListFragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.R
+import com.example.todolist.model.ToDo
+import com.example.todolist.view.home.adapter.ListToDoAdapter
+import com.google.firebase.database.DatabaseReference
 import kotlinx.android.synthetic.main.fragment_home.*
 
 /**
  * A simple [Fragment] subclass.
  */
-class HomeFragment : Fragment(), HomeView{
+class HomeFragment : Fragment(), HomeView, ListToDoAdapter.OnClickListener{
 
     private lateinit var presenterHome: HomePresenter
+    private lateinit var database: DatabaseReference
+    private var adapter: ListToDoAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +45,7 @@ class HomeFragment : Fragment(), HomeView{
         home_toolbar.setOnMenuItemClickListener{
             when (it.itemId) {
                 R.id.exit -> {
-                    activity!!.onBackPressed()
+                    findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToLoginFragment2())
                 }
             }
             true
@@ -47,7 +55,20 @@ class HomeFragment : Fragment(), HomeView{
             findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToAddFragment())
         }
 
+    }
 
+    override fun loadList(listToDo: MutableList<ToDo>) {
+        adapter = ListToDoAdapter(
+            listToDo,
+            requireContext(),
+            this
+        )
+        recyclerView.layoutManager = LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false)
+        recyclerView.adapter = adapter
+    }
+
+    override fun checkToDo(toDo: ToDo) {
+        TODO("Not yet implemented")
     }
 
     private fun getPresenter(): HomePresenter {

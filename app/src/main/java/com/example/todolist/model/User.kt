@@ -4,10 +4,11 @@ import com.google.firebase.database.IgnoreExtraProperties
 
 @IgnoreExtraProperties
 data class User(
-    var username: String? = "",
-    var email: String? = "",
-    var password: String? = "",
-    var phone: String? = "",
-    var image: ByteArray?,
-    var toDo: MutableList<ToDo>?
+    var uId: String? = "",
+    val username: String? = "",
+    val email: String? = "",
+    val password: String? = "",
+    val phone: String? = "",
+    val image: ByteArray?,
+    val toDo: MutableList<ToDo>?
 )
