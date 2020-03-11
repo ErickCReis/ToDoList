@@ -1,5 +1,6 @@
 package com.example.todolist.view.home
 
 interface HomePresenter {
-    fun getData()
+    fun getToDo()
+    fun saveToDos()
 }

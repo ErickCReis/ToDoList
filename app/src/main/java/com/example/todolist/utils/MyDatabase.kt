@@ -7,60 +7,120 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import io.reactivex.Observable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 
 object MyDatabase {
 
     val database = FirebaseDatabase.getInstance().reference
     var currentUserId: String? = ""
+    var toDos: MutableList<ToDo> = mutableListOf()
 
-    fun add(user: User): Boolean {
+    // Users Functions
+
+    suspend fun addUser(user: User): Boolean = coroutineScope {
+
         val key = database.child("users").push().key
         user.uid = key
         currentUserId = key
         database.child("users").child(key!!).setValue(user)
 
-        return true
+        true
     }
 
-    fun getUser(): User? {
+    suspend fun checkUser(email: String): Boolean = coroutineScope {
 
-        var user: User? = User()
+        database
+            .child("users")
+            .orderByChild("email")
+            .equalTo(email)
+            .limitToFirst(1)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot){
+                    if (dataSnapshot.exists()) {
 
-        val menuListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    }
+                }
 
-                val user = dataSnapshot.getValue(User::class.java)
-                Log.d("UpdateUser", user.toString())
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("loadPost:onCancelled ${databaseError.toException()}")
+                }
+            })
 
-            }
-            override fun onCancelled(databaseError: DatabaseError) {
-                println("loadPost:onCancelled ${databaseError.toException()}")
-            }
-        }
-        database.child("users").addValueEventListener(menuListener)
+        true
+    }
 
+    suspend fun getUserId(email: String): Boolean = coroutineScope {
 
+        database
+            .child("users")
+            .orderByChild("email")
+            .equalTo(email)
+            .limitToFirst(1)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        dataSnapshot.children.forEach {
+                            val user = it.getValue(User::class.java)
+                            currentUserId = user!!.uid
+                            Log.d("GetUserFun", currentUserId!!)
+                        }
+                    }
+                }
 
-        return user
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("loadPost:onCancelled ${databaseError.toException()}")
+                }
+            })
+
+        true
     }
 
     fun update(user: User) {
         database.child("users").child(currentUserId!!).setValue(user)
     }
 
-    fun checkUser(email: String): Boolean{
+    // ToDos Functions
 
-        return true
+    fun getToDos() {
+        toDos.clear()
+
+        database
+            .child("toDo")
+            .orderByChild(currentUserId!!)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                    if (dataSnapshot.exists()) {
+                        dataSnapshot.children.forEach {
+                            Log.d("GetToDos", it.value.toString())
+                            val toDo = it.getValue(ToDo::class.java)
+                            toDos.add(toDo!!)
+                        }
+                    }
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    println("loadUser:onCancelled ${databaseError.toException()}")
+                }
+            })
     }
 
     fun addToDo(toDo: ToDo) {
+        toDos.add(toDo)
+    }
 
-        val key = database.child("toDo").push().key
+    fun saveToDos() {
 
-        database.child("toDo")
+        runBlocking { database
+            .child("toDo")
             .child(currentUserId!!)
-            .child(key!!)
-            .setValue(toDo)
+            .setValue(toDos) }
+
+        currentUserId = ""
+
+        toDos.clear()
 
     }
 

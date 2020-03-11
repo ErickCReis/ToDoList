@@ -13,8 +13,10 @@ import com.example.todolist.R
 import com.example.todolist.model.User
 import com.example.todolist.utils.MyDatabase
 import com.google.firebase.database.*
+import io.reactivex.Observable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_login.*
+import kotlinx.coroutines.runBlocking
 
 /**
  * A simple [Fragment] subclass.
@@ -33,34 +35,22 @@ class LoginFragment : Fragment(), LoginView {
 
         login_button.setOnClickListener {
 
+            Log.d("LoginButton", MyDatabase.currentUserId!!)
+
             val email = login_email!!.text.toString()
+            if (presenterLogin.checkLogin(email)) {
 
-            MyDatabase.database
-                .child("users")
-                .orderByChild("email")
-                .equalTo(email)
-                .limitToFirst(1)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-
-                        if (dataSnapshot.exists()) {
-                            dataSnapshot.children.forEach {
-                                val user = it.getValue(User::class.java)
-                                MyDatabase.currentUserId = user!!.uid
-                            }
-
-                            findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToHomeFragment2())
-                        }
+                Observable.just(MyDatabase.currentUserId)
+                    .subscribe {
+                        Log.d("Obser", MyDatabase.currentUserId)
+                        //findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToHomeFragment2())
                     }
-
-                    override fun onCancelled(databaseError: DatabaseError) {
-                        println("loadPost:onCancelled ${databaseError.toException()}")
-                    }
-                })
-
+            }
         }
 
+
         login_register.setOnClickListener {
+
             findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToRegisterFragment())
         }
     }

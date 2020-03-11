@@ -2,5 +2,5 @@ package com.example.todolist.model
 
 data class ToDo (
     var title: String? = "",
-    var done: Boolean = false
+    var done: Boolean? = false
 )

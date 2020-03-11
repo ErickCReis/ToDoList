@@ -35,9 +35,8 @@ class ListToDoAdapter (private var listToDo: MutableList<ToDo>,
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val toDo = listToDo[position]
         holder.checkBox.text = toDo.title
-        if (toDo.done) {
+        if (toDo.done!!) {
             holder.checkBox.isChecked = true
-//            holder.checkBox.tin
         }
 
         holder.checkBox.setOnClickListener {

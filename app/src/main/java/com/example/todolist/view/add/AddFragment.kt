@@ -1,6 +1,7 @@
 package com.example.todolist.view.add
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +20,6 @@ import kotlinx.android.synthetic.main.fragment_add.*
 class AddFragment : Fragment(), AddView {
 
     private lateinit var presenterAdd: AddPresenter
-    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +43,9 @@ class AddFragment : Fragment(), AddView {
         }
 
         add_button.setOnClickListener {
+            Log.d("AddButton", MyDatabase.currentUserId!!)
             val toDo = ToDo(add_title.text.toString())
-            MyDatabase.addToDo(toDo)
+            presenterAdd.addToDo(toDo)
             requireActivity().onBackPressed()
         }
     }

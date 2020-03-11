@@ -32,6 +32,7 @@ class HomeFragment : Fragment(), HomeView, ListToDoAdapter.OnClickListener{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         presenterHome = getPresenter()
+        presenterHome.getToDo()
     }
 
     override fun onCreateView(
@@ -50,44 +51,30 @@ class HomeFragment : Fragment(), HomeView, ListToDoAdapter.OnClickListener{
         home_toolbar.setOnMenuItemClickListener{
             when (it.itemId) {
                 R.id.exit -> {
-                    MyDatabase.currentUserId = ""
+                    presenterHome.saveToDos()
                     requireActivity().onBackPressed()
                 }
             }
             true
         }
 
+        swipe_home.setOnRefreshListener {
+            swipe_home.isRefreshing = false
+            loadList(MyDatabase.toDos)
+        }
+
         Log.d("Home_MyId", MyDatabase.currentUserId!!)
 
-        MyDatabase.database
-            .child("toDo")
-            .child(MyDatabase.currentUserId!!)
-            .addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-
-                    if (dataSnapshot.exists()) {
-
-                        val listToDo: MutableList<ToDo> = mutableListOf()
-                        for (data in dataSnapshot.children) {
-                            val toDo = data.getValue(ToDo::class.java)
-                            listToDo.add(toDo!!)
-                        }
-                        Log.d("Home_response", listToDo.toString())
-                        loadList(listToDo)
-                    }
-
-
-
-                }
-                override fun onCancelled(databaseError: DatabaseError) {
-                    println("loadUser:onCancelled ${databaseError.toException()}")
-                }
-            })
 
         floating_button.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToAddFragment())
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadList(MyDatabase.toDos)
     }
 
     override fun loadList(listToDo: MutableList<ToDo>) {
