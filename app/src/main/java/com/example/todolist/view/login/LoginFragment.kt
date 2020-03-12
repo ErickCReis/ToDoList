@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.findNavController
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 
 import com.example.todolist.R
@@ -33,18 +33,19 @@ class LoginFragment : Fragment(), LoginView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         login_button.setOnClickListener {
 
-            Log.d("LoginButton", MyDatabase.currentUserId!!)
+            Log.d("LoginButton", "Click")
 
             val email = login_email!!.text.toString()
             if (presenterLogin.checkLogin(email)) {
 
-                Observable.just(MyDatabase.currentUserId)
-                    .subscribe {
-                        Log.d("Obser", MyDatabase.currentUserId)
-                        //findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToHomeFragment2())
-                    }
+                MyDatabase.currentUserId.observe( requireActivity(), Observer {
+                    Log.d("LoginObserver", it)
+                    this.findNavController().navigate(LoginFragmentDirections.actionLoginFragmentToHomeFragment2())
+                    MyDatabase.currentUserId.removeObservers(requireActivity())
+                })
             }
         }
 

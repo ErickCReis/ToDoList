@@ -40,12 +40,23 @@ class ListToDoAdapter (private var listToDo: MutableList<ToDo>,
         }
 
         holder.checkBox.setOnClickListener {
-            listener.checkToDo(toDo)
+            listener.checkToDo(holder.checkBox.isChecked, position)
         }
     }
 
     interface OnClickListener {
-        fun checkToDo(toDo: ToDo)
+        fun checkToDo(state: Boolean, position: Int)
+    }
+
+    private fun delete(position: Int) {
+        listToDo.removeAt(position)
+        notifyItemRemoved(position)
+    }
+
+    fun clear() {
+        for (i in 0 until this.itemCount) {
+            this.delete(i)
+        }
     }
 
     override fun getFilter(): Filter {

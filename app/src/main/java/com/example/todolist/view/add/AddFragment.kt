@@ -43,9 +43,11 @@ class AddFragment : Fragment(), AddView {
         }
 
         add_button.setOnClickListener {
-            Log.d("AddButton", MyDatabase.currentUserId!!)
+            Log.d("AddButton", "Click")
             val toDo = ToDo(add_title.text.toString())
+            toDo.done = false
             presenterAdd.addToDo(toDo)
+
             requireActivity().onBackPressed()
         }
     }

@@ -2,24 +2,20 @@ package com.example.todolist.view.home
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.ListFragment
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todolist.R
 import com.example.todolist.model.ToDo
-import com.example.todolist.model.User
 import com.example.todolist.utils.MyDatabase
 import com.example.todolist.view.home.adapter.ListToDoAdapter
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.fragment_home.*
+import kotlinx.coroutines.runBlocking
 
 /**
  * A simple [Fragment] subclass.
@@ -46,36 +42,32 @@ class HomeFragment : Fragment(), HomeView, ListToDoAdapter.OnClickListener{
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        Log.d("Home", "ViewCreated")
+
         home_toolbar.title = "Tarefas"
         home_toolbar.inflateMenu(R.menu.menu)
         home_toolbar.setOnMenuItemClickListener{
             when (it.itemId) {
-                R.id.exit -> {
-                    presenterHome.saveToDos()
-                    requireActivity().onBackPressed()
-                }
+                R.id.exit -> activity!!.onBackPressed()
             }
             true
         }
 
-        swipe_home.setOnRefreshListener {
-            swipe_home.isRefreshing = false
-            loadList(MyDatabase.toDos)
-        }
-
-        Log.d("Home_MyId", MyDatabase.currentUserId!!)
-
+        //swipe_home.setOnRefreshListener {
+        //    swipe_home.isRefreshing = false
+        //    loadList(MyDatabase.toDos.value!!)
+        //}
 
         floating_button.setOnClickListener {
             findNavController().navigate(HomeFragmentDirections.actionHomeFragmentToAddFragment())
         }
 
+        MyDatabase.toDos.observe(requireActivity(), Observer {
+            Log.d("HomeObeserver", it.toString())
+            loadList(it)
+        })
     }
 
-    override fun onResume() {
-        super.onResume()
-        loadList(MyDatabase.toDos)
-    }
 
     override fun loadList(listToDo: MutableList<ToDo>) {
         adapter = ListToDoAdapter(
@@ -87,8 +79,27 @@ class HomeFragment : Fragment(), HomeView, ListToDoAdapter.OnClickListener{
         recyclerView.adapter = adapter
     }
 
-    override fun checkToDo(toDo: ToDo) {
-        Log.d("CheckBox", toDo.title)
+    override fun checkToDo(state: Boolean, position: Int) {
+        MyDatabase.toDos.value!![position].done = state
+    }
+
+    override fun onResume() {
+        Log.d("Home", "Resume")
+
+        super.onResume()
+    }
+
+    override fun onStop() {
+
+        Log.d("Home", "Stop")
+
+        MyDatabase.toDos.removeObservers( requireActivity())
+
+        presenterHome.saveToDos()
+
+        MyDatabase.toDos.value!!.clear()
+
+        super.onStop()
     }
 
     private fun getPresenter(): HomePresenter {

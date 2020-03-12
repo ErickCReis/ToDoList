@@ -1,6 +1,7 @@
 package com.example.todolist.utils
 
 import android.util.Log
+import androidx.lifecycle.*
 import com.example.todolist.model.ToDo
 import com.example.todolist.model.User
 import com.google.firebase.database.DataSnapshot
@@ -11,12 +12,19 @@ import io.reactivex.Observable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
+import kotlin.properties.Delegates
 
-object MyDatabase {
+object MyDatabase : ViewModel() {
 
-    val database = FirebaseDatabase.getInstance().reference
-    var currentUserId: String? = ""
-    var toDos: MutableList<ToDo> = mutableListOf()
+    private val database = FirebaseDatabase.getInstance().reference
+
+    var currentUserId = MutableLiveData<String>()
+    var toDos = MutableLiveData<MutableList<ToDo>>()
+
+    init {
+        //currentUserId.value = ""
+        toDos.value = mutableListOf()
+    }
 
     // Users Functions
 
@@ -24,8 +32,12 @@ object MyDatabase {
 
         val key = database.child("users").push().key
         user.uid = key
-        currentUserId = key
-        database.child("users").child(key!!).setValue(user)
+        currentUserId.value = key
+
+        database
+            .child("users")
+            .child(key!!)
+            .setValue(user)
 
         true
     }
@@ -64,8 +76,8 @@ object MyDatabase {
                     if (dataSnapshot.exists()) {
                         dataSnapshot.children.forEach {
                             val user = it.getValue(User::class.java)
-                            currentUserId = user!!.uid
-                            Log.d("GetUserFun", currentUserId!!)
+                            currentUserId.value = user!!.uid
+                            Log.d("GetUserFun", currentUserId.value!!)
                         }
                     }
                 }
@@ -79,26 +91,31 @@ object MyDatabase {
     }
 
     fun update(user: User) {
-        database.child("users").child(currentUserId!!).setValue(user)
+        database.child("users").child(currentUserId.value!!).setValue(user)
     }
 
     // ToDos Functions
 
     fun getToDos() {
-        toDos.clear()
+
+        Log.d("GetTodo", currentUserId.toString())
+
+
 
         database
             .child("toDo")
-            .orderByChild(currentUserId!!)
-            .addValueEventListener(object : ValueEventListener {
+            .child(currentUserId.value!!)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
 
                     if (dataSnapshot.exists()) {
+                        val temp: MutableList<ToDo> = mutableListOf()
                         dataSnapshot.children.forEach {
-                            Log.d("GetToDos", it.value.toString())
+                            Log.d("ToDoResponse", it.value.toString())
                             val toDo = it.getValue(ToDo::class.java)
-                            toDos.add(toDo!!)
+                            temp.add(toDo!!)
                         }
+                        toDos.postValue(temp)
                     }
                 }
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -108,23 +125,42 @@ object MyDatabase {
     }
 
     fun addToDo(toDo: ToDo) {
-        toDos.add(toDo)
+        Log.d("Database", "addToDo: $toDo")
+
+
+        val temp = toDos.value!!
+        temp.add(toDo)
+
+        Log.d("Database", "addToDoTemp: $temp")
+
+        //toDos.value!!.clear()
+        //toDos.value!!.add(toDo)
+        toDos.postValue(temp)
+
+        Log.d("Database", "ToDo: ${toDos.value}")
+
+        //toDos.postValue(temp)
+
+        saveToDos()
     }
 
     fun saveToDos() {
+        Log.d("Database", "Save")
 
-        runBlocking { database
+        database
             .child("toDo")
-            .child(currentUserId!!)
-            .setValue(toDos) }
-
-        currentUserId = ""
-
-        toDos.clear()
+            .child(currentUserId.value!!)
+            .setValue(toDos.value)
 
     }
 
     fun updateToDo(toDo: ToDo) {
+
+    }
+
+    fun clear() {
+        toDos.value!!.clear()
+        //currentUserId.value = ""
 
     }
 }

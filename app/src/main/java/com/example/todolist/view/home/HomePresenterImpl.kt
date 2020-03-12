@@ -1,5 +1,6 @@
 package com.example.todolist.view.home
 
+import android.util.Log
 import com.example.todolist.utils.MyDatabase
 
 class HomePresenterImpl: HomePresenter {
@@ -9,6 +10,7 @@ class HomePresenterImpl: HomePresenter {
     }
 
     override fun saveToDos() {
+
         MyDatabase.saveToDos()
     }
 }
